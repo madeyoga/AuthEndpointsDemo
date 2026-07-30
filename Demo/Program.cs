@@ -53,7 +53,11 @@ var githubClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRE
 var googleClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
 var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
 
-var externalAuth = builder.Services.AddExternalAuthEndpoints<AppUser>();
+var externalAuth = builder.Services.AddExternalAuthEndpoints<AppUser>(o =>
+{
+    o.AllowedReturnUrlOrigins.Add("http://localhost:3000");
+});
+
 if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientSecret))
 {
     externalAuth.AddGitHub(o =>
@@ -110,24 +114,24 @@ app.UseMiddleware<AntiforgeryEnforcementMiddleware>();
 
 app.MapAuthEndpoints<AppUser>();
 
-// var external = app.MapGroup("/auth/external").WithTags("External");
-// var mappedExternalProvider = false;
-// if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientSecret))
-// {
-//     external.MapGitHubAuthEndpoints<AppUser>();
-//     mappedExternalProvider = true;
-// }
+var external = app.MapGroup("/auth/external").WithTags("External");
+var mappedExternalProvider = false;
+if (!string.IsNullOrEmpty(githubClientId) && !string.IsNullOrEmpty(githubClientSecret))
+{
+    external.MapGitHubAuthEndpoints<AppUser>();
+    mappedExternalProvider = true;
+}
 
-// if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
-// {
-//     external.MapGoogleAuthEndpoints<AppUser>();
-//     mappedExternalProvider = true;
-// }
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    external.MapGoogleAuthEndpoints<AppUser>();
+    mappedExternalProvider = true;
+}
 
-// if (mappedExternalProvider)
-// {
-//     external.MapExternalAccountEndpoints<AppUser>();
-// }
+if (mappedExternalProvider)
+{
+    external.MapExternalAccountEndpoints<AppUser>();
+}
 
 app.MapPost("/test/csrf", () => Results.Ok()).EnableAntiforgery();
 app.MapGet("/test/reauth", () => Results.Ok()).RequireReauth();
