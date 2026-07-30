@@ -1,0 +1,25 @@
+# Root
+.DS_Store
+*.user
+*.suo
+.vs/
+.idea/
+TEMP/
+
+# Env
+.env
+**/.env
+!**/.env.example
+
+# .NET
+**/bin/
+**/obj/
+*.db
+*.db-shm
+*.db-wal
+
+# Node
+**/node_modules/
+**/.nuxt/
+**/.output/
+**/dist/
