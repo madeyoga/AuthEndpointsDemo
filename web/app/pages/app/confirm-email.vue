@@ -108,33 +108,5 @@ onMounted(() => {
       variant="subtle"
       :description="signInError"
     />
-
-    <div class="flex flex-col gap-2">
-      <UButton
-        v-if="isConfirmed || (!isConfirmed && !isFailed)"
-        to="/app/login"
-        block
-        :loading="signingIn"
-        :disabled="signingIn"
-      >
-        Sign in
-      </UButton>
-      <template v-if="isFailed">
-        <UButton
-          to="/app/register"
-          block
-        >
-          Register
-        </UButton>
-        <UButton
-          to="/app/login"
-          color="neutral"
-          variant="outline"
-          block
-        >
-          Sign in
-        </UButton>
-      </template>
-    </div>
   </div>
 </template>
