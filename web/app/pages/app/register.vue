@@ -13,6 +13,7 @@ useSeoMeta({
 })
 
 const { api, ensureCookieMode, isPasskeyCancel, problemMessage } = useAppAuth()
+const { stash } = usePendingRegistration()
 const toast = useToast()
 
 const tabs: TabsItem[] = [
@@ -58,6 +59,11 @@ async function registerPassword() {
       auth: false,
       csrfPath: '/auth/cookie/csrfToken'
     })
+    stash({
+      email: passwordForm.email,
+      password: passwordForm.password,
+      method: 'password'
+    })
     await goToCheckEmail(passwordForm.email)
   } catch (error) {
     if (error instanceof FetchError && error.statusCode === 400) {
@@ -91,6 +97,10 @@ async function registerPasskey() {
       },
       csrfPath: '/auth/cookie/csrfToken',
       auth: false
+    })
+    stash({
+      email: passkeyEmail.value,
+      method: 'passkey'
     })
     await goToCheckEmail(passkeyEmail.value)
   } catch (error) {

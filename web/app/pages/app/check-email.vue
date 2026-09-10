@@ -8,7 +8,16 @@ useSeoMeta({
 })
 
 const route = useRoute()
-const { confirmEmail } = useAppAuth()
+const { confirmEmail, loginWithPassword, loginFailureMessage } = useAppAuth()
+const {
+  pending,
+  clear,
+  syncExpiry,
+  passwordStash,
+  isPasskeyStash,
+  subscribeToConfirmed,
+  pendingEmailMatches
+} = usePendingRegistration()
 const toast = useToast()
 
 const email = computed(() => {
@@ -23,6 +32,28 @@ const confirmForm = reactive({
 })
 const pastedUrl = ref('')
 const busy = ref(false)
+const signingIn = ref(false)
+const signInError = ref('')
+const autoLoginAttempted = ref(false)
+
+const hasPasswordStash = computed(() => !!passwordStash(email.value || null))
+const hasPasskeyStash = computed(() => isPasskeyStash(email.value || null))
+
+const waitingCopy = computed(() => {
+  if (hasPasskeyStash.value) {
+    return 'we sent a confirmation link. Confirm from the API console (or paste the link below), then continue with your passkey. This page does not sign you in automatically.'
+  }
+  if (hasPasswordStash.value) {
+    return 'we sent a confirmation link. In this local Demo, the message is written to the API console. After you confirm in this browser, we can sign you in once — this page does not retry login.'
+  }
+  return 'we sent a confirmation link. In this local Demo, the message is written to the API console.'
+})
+
+const loginQuery = computed(() => email.value ? { email: email.value } : undefined)
+const passkeyLoginQuery = computed(() => ({
+  ...(loginQuery.value ?? {}),
+  method: 'passkey'
+}))
 
 function parseConfirmLink() {
   const raw = pastedUrl.value.trim() || window.prompt('Paste the full confirmation URL from the API console') || ''
@@ -68,6 +99,80 @@ async function submitConfirm() {
     busy.value = false
   }
 }
+
+async function tryPasswordLoginOnce(source: 'auto' | 'manual') {
+  const stash = passwordStash(email.value || null)
+  if (!stash?.password) {
+    if (source === 'manual') {
+      await navigateTo({
+        path: '/app/login',
+        query: loginQuery.value
+      })
+    }
+    return
+  }
+
+  if (source === 'auto' && autoLoginAttempted.value) {
+    return
+  }
+  if (signingIn.value) {
+    return
+  }
+  if (source === 'auto') {
+    autoLoginAttempted.value = true
+  }
+
+  signingIn.value = true
+  signInError.value = ''
+  try {
+    await loginWithPassword(stash.email, stash.password)
+    clear()
+    await navigateTo('/app')
+  } catch (error) {
+    signInError.value = source === 'auto'
+      ? `${loginFailureMessage(error)} Confirm your email, then sign in.`
+      : loginFailureMessage(error)
+  } finally {
+    signingIn.value = false
+  }
+}
+
+async function onConfirmedSignIn() {
+  await tryPasswordLoginOnce('manual')
+}
+
+async function useDifferentEmail() {
+  clear()
+  await navigateTo('/app/register')
+}
+
+let unsubscribeConfirmed = () => {}
+
+onMounted(() => {
+  syncExpiry()
+  unsubscribeConfirmed = subscribeToConfirmed((message) => {
+    const stash = pending.value
+    if (!stash) {
+      return
+    }
+    if (!pendingEmailMatches(stash.email, message.email)) {
+      return
+    }
+    if (stash.method === 'passkey') {
+      toast.add({
+        title: 'Email confirmed',
+        description: 'Continue with your passkey to sign in.',
+        color: 'success'
+      })
+      return
+    }
+    void tryPasswordLoginOnce('auto')
+  })
+})
+
+onUnmounted(() => {
+  unsubscribeConfirmed()
+})
 </script>
 
 <template>
@@ -79,22 +184,47 @@ async function submitConfirm() {
       <p class="text-sm text-muted">
         If an account can be created for
         <span class="font-medium">{{ email || 'that address' }}</span>,
-        we sent a confirmation link. In this local Demo, the message is written to the API console.
+        {{ waitingCopy }}
       </p>
     </div>
 
+    <UAlert
+      v-if="signInError"
+      color="error"
+      variant="subtle"
+      :description="signInError"
+    />
+
     <div class="flex flex-col gap-2">
       <UButton
-        to="/app/login"
+        v-if="hasPasskeyStash"
+        :to="{ path: '/app/login', query: passkeyLoginQuery }"
         block
+      >
+        Continue with passkey
+      </UButton>
+      <UButton
+        v-else
+        block
+        :loading="signingIn"
+        @click="onConfirmedSignIn"
       >
         I’ve confirmed — sign in
       </UButton>
       <UButton
-        to="/app/register"
+        v-if="hasPasskeyStash"
+        :to="{ path: '/app/login', query: loginQuery }"
         color="neutral"
         variant="outline"
         block
+      >
+        Sign in
+      </UButton>
+      <UButton
+        color="neutral"
+        variant="outline"
+        block
+        @click="useDifferentEmail"
       >
         Use a different email
       </UButton>
