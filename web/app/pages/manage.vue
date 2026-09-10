@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { ManageInfo } from '~/types/auth'
 
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api } = useApi()
 const { mode } = useAuthState()
 const { info, refreshSession } = useAuthSession()

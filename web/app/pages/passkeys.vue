@@ -2,6 +2,10 @@
 import type { PasskeyCredential } from '~/types/auth'
 import { createPasskeyCredential, getPasskeyCredential } from '~/utils/webauthn'
 
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api } = useApi()
 const { mode, setMode } = useAuthState()
 const { refreshSession } = useAuthSession()

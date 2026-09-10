@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api } = useApi()
 const { refreshSession } = useAuthSession()
 const toast = useToast()
@@ -48,8 +52,16 @@ async function confirmEmail() {
     })
     toast.add({ title: 'Email confirmed', color: 'success' })
     await refreshSession()
-  } catch {
-    toast.add({ title: 'Confirm failed', color: 'error' })
+  } catch (error) {
+    const url = error && typeof error === 'object' && 'response' in error
+      ? String((error as { response?: { url?: string } }).response?.url ?? '')
+      : ''
+    if (url.includes('status=confirmed')) {
+      toast.add({ title: 'Email confirmed', color: 'success' })
+      await refreshSession()
+    } else {
+      toast.add({ title: 'Confirm failed', color: 'error' })
+    }
   } finally {
     busy.value = false
   }
@@ -61,7 +73,7 @@ function parseConfirmLink() {
     return
   }
   try {
-    const url = new URL(raw)
+    const url = new URL(raw.replace(/&amp;/g, '&'))
     confirmForm.userId = url.searchParams.get('userId') ?? ''
     confirmForm.code = url.searchParams.get('code') ?? ''
     confirmForm.changedEmail = url.searchParams.get('changedEmail') ?? ''

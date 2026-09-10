@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api } = useApi()
 const toast = useToast()
 const busy = ref(false)

@@ -1,6 +1,6 @@
 # AuthEndpoints playground UI
 
-Nuxt 4 + Nuxt UI app that exercises the Demo API.
+Nuxt 4 + Nuxt UI app that exercises the Demo API and hosts the cookie SPA app flow under `/app`.
 
 ```bash
 pnpm install
