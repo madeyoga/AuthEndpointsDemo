@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { JwtTokenResponse } from '~/types/auth'
 
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api, fetchCsrf } = useApi()
 const { accessToken, setMode, setAccessToken } = useAuthState()
 const { refreshSession, signOut } = useAuthSession()

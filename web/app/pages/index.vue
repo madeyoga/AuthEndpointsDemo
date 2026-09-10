@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'playground'
+})
+
 useSeoMeta({
   title: 'AuthEndpoints Demo',
   description: 'Playground UI for AuthEndpoints cookie, JWT, passkeys, and external auth.'
@@ -10,6 +14,22 @@ useSeoMeta({
     title="Overview"
     description="Exercise the Demo API auth surface from a real browser (cookies, CSRF, WebAuthn, OAuth)."
   >
+    <ActionPanel
+      class="mb-4"
+      title="Try the app flow"
+      description="Cookie SPA path: register, confirm email, sign in, dummy home."
+    >
+      <p class="text-sm text-muted">
+        Walk a normal product path while these playground panels stay available for API exercise.
+      </p>
+      <UButton
+        to="/app/register"
+        icon="i-lucide-app-window"
+      >
+        Try the app flow
+      </UButton>
+    </ActionPanel>
+
     <div class="grid gap-4 md:grid-cols-2">
       <ActionPanel
         title="Configured routes"

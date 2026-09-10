@@ -30,7 +30,8 @@ builder.Services
         o.IdentityPath = "/auth/cookie";
         o.PasskeyPath = "/auth/passkey";
         o.Passkeys.ServerDomain = "localhost";
-        o.RequireConfirmedAccount = false; // DEFAULT IS TRUE
+        o.RequireConfirmedAccount = true;
+        o.EmailConfirmation.ConfirmEmailRedirectUri = "/app/confirm-email";
         o.Jwt.Enabled = true;
         o.Jwt.Path = "/auth/jwt";
         o.Jwt.Configure = jwt =>
@@ -133,6 +134,25 @@ if (mappedExternalProvider)
     external.MapExternalAccountEndpoints<AppUser>();
 }
 
+app.MapGet("/app/confirm-email", (string? status, string? flow) =>
+{
+    var destination = $"{frontendOrigin.TrimEnd('/')}/app/confirm-email";
+    var query = new List<string>();
+    if (!string.IsNullOrEmpty(status))
+    {
+        query.Add($"status={Uri.EscapeDataString(status)}");
+    }
+    if (!string.IsNullOrEmpty(flow))
+    {
+        query.Add($"flow={Uri.EscapeDataString(flow)}");
+    }
+    if (query.Count > 0)
+    {
+        destination += "?" + string.Join("&", query);
+    }
+    return Results.Redirect(destination);
+});
+
 app.MapPost("/test/csrf", () => Results.Ok()).EnableAntiforgery();
 app.MapGet("/test/reauth", () => Results.Ok()).RequireReauth();
 
@@ -141,7 +161,8 @@ app.MapGet("createDefaultUser", async (UserManager<AppUser> userManager) =>
     var user = new AppUser()
     {
         UserName = "admin@authendpoints.id",
-        Email = "admin@authendpoints.id"
+        Email = "admin@authendpoints.id",
+        EmailConfirmed = true
     };
 
     await userManager.CreateAsync(user, "T3$ttest");

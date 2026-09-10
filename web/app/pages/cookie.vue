@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api, fetchCsrf } = useApi()
 const { setMode } = useAuthState()
 const { refreshSession, signOut } = useAuthSession()

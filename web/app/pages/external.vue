@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'playground'
+})
+
 const { api, baseURL } = useApi()
 const { mode } = useAuthState()
 const toast = useToast()
