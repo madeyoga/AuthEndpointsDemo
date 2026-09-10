@@ -112,29 +112,29 @@ export function useAppAuth() {
     const url = `${baseURL.value}${path}`
 
     try {
-      const response = await $fetch.raw(url, {
-        credentials: 'include',
+      // Browser fetch cannot follow the API 302 onto this Nuxt origin (CORS).
+      const result = await $fetch<{
+        status: 'confirmed' | 'failed'
+        flow: 'confirm' | 'change-email'
+        location?: string
+      }>('/api/app/confirm-email', {
         query: {
           userId: query.userId,
           code: query.code,
           changedEmail: query.changedEmail || undefined
-        },
-        ignoreResponseError: true
+        }
       })
-      const finalUrl = response.url || url
-      const status = confirmRedirectStatus(finalUrl)
-        ?? (response.status === 200 ? 'confirmed' : 'failed')
 
       pushLog({
         method: 'GET',
-        url: finalUrl,
-        status: response.status,
-        ok: status === 'confirmed',
+        url: result.location || url,
+        status: result.status === 'confirmed' ? 302 : null,
+        ok: result.status === 'confirmed',
         requestBody: query,
-        responseBody: response._data
+        responseBody: result
       })
 
-      return { status, flow }
+      return { status: result.status, flow: result.flow }
     } catch (error) {
       const failedUrl = error && typeof error === 'object' && 'response' in error
         ? String((error as { response?: { url?: string } }).response?.url ?? '')
