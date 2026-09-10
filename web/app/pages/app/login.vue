@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
-import { FetchError } from 'ofetch'
 import { getPasskeyCredential } from '~/utils/webauthn'
 
 definePageMeta({
@@ -13,13 +12,16 @@ useSeoMeta({
 })
 
 const route = useRoute()
-const { api, ensureCookieMode, refreshCookieSession, isPasskeyCancel, problemMessage, safeAppRedirect } = useAppAuth()
+const { api, ensureCookieMode, loginWithPassword, loginFailureMessage, isPasskeyCancel, safeAppRedirect } = useAppAuth()
+const { pending, clear } = usePendingRegistration()
 const toast = useToast()
 
 const tabs: TabsItem[] = [
-  { label: 'Password', icon: 'i-lucide-lock', slot: 'password' },
-  { label: 'Passkey', icon: 'i-lucide-fingerprint', slot: 'passkey' }
+  { label: 'Password', icon: 'i-lucide-lock', slot: 'password', value: 'password' },
+  { label: 'Passkey', icon: 'i-lucide-fingerprint', slot: 'passkey', value: 'passkey' }
 ]
+
+const selectedTab = computed(() => route.query.method === 'passkey' ? 'passkey' : 'password')
 
 const passwordForm = reactive({
   email: '',
@@ -30,33 +32,32 @@ const passkeyUsername = ref('')
 const busy = ref(false)
 const errorMessage = ref('')
 
+const queryEmail = computed(() => {
+  const value = route.query.email
+  return typeof value === 'string' ? value : ''
+})
+
+if (queryEmail.value) {
+  passwordForm.email = queryEmail.value
+  passkeyUsername.value = queryEmail.value
+} else if (pending.value?.email) {
+  passwordForm.email = pending.value.email
+  passkeyUsername.value = pending.value.email
+}
+
 async function afterLogin() {
-  await refreshCookieSession()
+  clear()
   await navigateTo(safeAppRedirect(route.query.redirect))
 }
 
 async function loginPassword() {
   errorMessage.value = ''
   busy.value = true
-  ensureCookieMode()
   try {
-    await api('/auth/cookie/login', {
-      method: 'POST',
-      query: passwordForm.rememberMe ? { useSessionCookies: false } : { useSessionCookies: true },
-      body: {
-        email: passwordForm.email,
-        password: passwordForm.password
-      },
-      skipCsrf: true,
-      auth: false
-    })
+    await loginWithPassword(passwordForm.email, passwordForm.password, passwordForm.rememberMe)
     await afterLogin()
   } catch (error) {
-    if (error instanceof FetchError && error.statusCode === 401) {
-      errorMessage.value = 'Invalid credentials.'
-    } else {
-      errorMessage.value = problemMessage(error, 'Invalid credentials.')
-    }
+    errorMessage.value = loginFailureMessage(error)
   } finally {
     busy.value = false
   }
@@ -91,11 +92,7 @@ async function loginPasskey() {
       })
       return
     }
-    if (error instanceof FetchError && error.statusCode === 401) {
-      errorMessage.value = 'Invalid credentials.'
-    } else {
-      errorMessage.value = problemMessage(error, 'Invalid credentials.')
-    }
+    errorMessage.value = loginFailureMessage(error)
   } finally {
     busy.value = false
   }
@@ -122,6 +119,7 @@ async function loginPasskey() {
 
     <UTabs
       :items="tabs"
+      :default-value="selectedTab"
       class="w-full"
     >
       <template #password>

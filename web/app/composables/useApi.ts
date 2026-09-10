@@ -94,7 +94,7 @@ export function useApi() {
         headers,
         body: options.body as BodyInit | Record<string, unknown> | null | undefined,
         query: options.query
-      })
+      }) as T
 
       if (!options.silent) {
         pushLog({

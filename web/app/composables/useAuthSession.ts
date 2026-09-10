@@ -4,6 +4,7 @@ import { FetchError } from 'ofetch'
 export function useAuthSession() {
   const { mode, email, accessToken, setAccessToken, setReauthToken } = useAuthState()
   const { api, clearCsrf, logoutLocal } = useApi()
+  const { clear: clearPendingRegistration } = usePendingRegistration()
   const loading = useState('auth-session-loading', () => false)
   const info = useState<ManageInfo | null>('auth-manage-info', () => null)
 
@@ -60,6 +61,7 @@ export function useAuthSession() {
       info.value = null
       email.value = null
       clearCsrf()
+      clearPendingRegistration()
     }
   }
 
