@@ -12,8 +12,14 @@ const { info, refreshCookieSession } = useAppAuth()
 
 const claims = computed(() => (info.value?.claims ?? []).slice(0, 8))
 
-onMounted(() => {
-  refreshCookieSession()
+onMounted(async () => {
+  const session = await refreshCookieSession()
+  if (!session) {
+    await navigateTo({
+      path: '/app/login',
+      query: { redirect: '/app' }
+    })
+  }
 })
 </script>
 

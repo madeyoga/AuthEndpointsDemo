@@ -73,7 +73,7 @@ function parseConfirmLink() {
     return
   }
   try {
-    const url = new URL(raw)
+    const url = new URL(raw.replace(/&amp;/g, '&'))
     confirmForm.userId = url.searchParams.get('userId') ?? ''
     confirmForm.code = url.searchParams.get('code') ?? ''
     confirmForm.changedEmail = url.searchParams.get('changedEmail') ?? ''

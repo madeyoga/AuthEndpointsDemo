@@ -56,6 +56,9 @@ var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRE
 
 var externalAuth = builder.Services.AddExternalAuthEndpoints<AppUser>(o =>
 {
+    // Rooted "/" is UriKind.Absolute (file://) on Linux; "~/" stays a relative local path.
+    o.DefaultReturnUrl = "~/";
+    o.ErrorPath = "~/auth/external/error";
     o.AllowedReturnUrlOrigins.Add("http://localhost:3000");
 });
 
