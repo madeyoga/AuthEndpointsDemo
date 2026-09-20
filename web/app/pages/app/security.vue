@@ -170,17 +170,27 @@ onMounted(async () => {
       </p>
     </div>
 
-    <UPageCard
-      title="Email"
-      description="Your sign-in email and confirmation status."
+    <UCard
       :class="emailConfirmed ? 'bg-gradient-to-tl from-primary/10 from-5% to-default' : 'bg-gradient-to-tl from-error/10 from-5% to-default'"
     >
+      <template #header>
+        <div>
+          <p class="font-semibold">
+            Email
+          </p>
+          <p class="text-sm text-muted">
+            Your sign-in email and confirmation status.
+          </p>
+        </div>
+      </template>
       <div class="flex justify-between gap-3 py-3">
         <div class="flex min-w-0 gap-3">
-          <UAvatar
-            icon="i-lucide-mail"
-            size="xl"
-          />
+          <div class="bg-elevated flex size-10 shrink-0 items-center justify-center rounded-full">
+            <UIcon
+              name="i-lucide-mail"
+              class="size-5"
+            />
+          </div>
           <div class="min-w-0">
             <p class="text-highlighted font-medium">
               {{ displayedEmail || '—' }}
@@ -231,27 +241,44 @@ onMounted(async () => {
           @success="refreshCookieSession"
         />
       </div>
-    </UPageCard>
+    </UCard>
 
-    <UPageCard
-      title="Password"
-      description="Change your account password. You will confirm your identity before the change is saved."
-    >
+    <UCard>
+      <template #header>
+        <div>
+          <p class="font-semibold">
+            Password
+          </p>
+          <p class="text-sm text-muted">
+            Change your account password. You will confirm your identity before the change is saved.
+          </p>
+        </div>
+      </template>
       <SettingsChangePasswordForm @success="refreshCookieSession" />
-    </UPageCard>
+    </UCard>
 
-    <UPageCard
+    <UCard
       v-if="twoFactor || loadingTwoFactor"
-      title="Two-factor authentication"
-      description="Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in."
       :class="twoFactor?.isTwoFactorEnabled ? 'bg-gradient-to-tl from-primary/10 from-5% to-default' : 'bg-gradient-to-tl from-error/10 from-5% to-default'"
     >
+      <template #header>
+        <div>
+          <p class="font-semibold">
+            Two-factor authentication
+          </p>
+          <p class="text-sm text-muted">
+            Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
+          </p>
+        </div>
+      </template>
       <div class="flex justify-between gap-3 py-3">
         <div class="flex min-w-0 gap-3">
-          <UAvatar
-            icon="i-lucide-smartphone"
-            size="xl"
-          />
+          <div class="bg-elevated flex size-10 shrink-0 items-center justify-center rounded-full">
+            <UIcon
+              name="i-lucide-smartphone"
+              class="size-5"
+            />
+          </div>
           <div class="min-w-0">
             <p class="text-highlighted truncate font-medium">
               Authenticator app
@@ -293,18 +320,24 @@ onMounted(async () => {
           />
         </div>
       </div>
-    </UPageCard>
+    </UCard>
 
-    <UPageCard
-      v-if="twoFactor"
-      title="Recovery options"
-    >
+    <UCard v-if="twoFactor">
+      <template #header>
+        <div>
+          <p class="font-semibold">
+            Recovery options
+          </p>
+        </div>
+      </template>
       <div class="flex justify-between gap-3 py-3">
         <div class="flex min-w-0 gap-3">
-          <UAvatar
-            icon="i-lucide-key-round"
-            size="xl"
-          />
+          <div class="bg-elevated flex size-10 shrink-0 items-center justify-center rounded-full">
+            <UIcon
+              name="i-lucide-key-round"
+              class="size-5"
+            />
+          </div>
           <div class="min-w-0">
             <p class="text-highlighted truncate font-medium">
               Recovery codes
@@ -332,7 +365,7 @@ onMounted(async () => {
           />
         </div>
       </div>
-    </UPageCard>
+    </UCard>
 
     <UModal
       v-model:open="confirmRegenerateOpen"

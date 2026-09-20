@@ -7,11 +7,17 @@ const { copy, download } = useRecoveryCodes()
 </script>
 
 <template>
-  <UPageCard
-    title="Keep these codes in a safe place"
-    description="Each code can be used once. They will not be shown again."
-    variant="soft"
-  >
+  <UCard>
+    <template #header>
+      <div>
+        <p class="font-semibold">
+          Keep these codes in a safe place
+        </p>
+        <p class="text-sm text-muted">
+          Each code can be used once. They will not be shown again.
+        </p>
+      </div>
+    </template>
     <ul class="space-y-1 font-mono text-sm">
       <li
         v-for="value in props.codes"
@@ -34,5 +40,5 @@ const { copy, download } = useRecoveryCodes()
         />
       </div>
     </template>
-  </UPageCard>
+  </UCard>
 </template>

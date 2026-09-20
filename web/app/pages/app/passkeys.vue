@@ -151,10 +151,17 @@ onMounted(() => {
       description="Passkeys.ServerDomain is localhost. Use Chrome/Edge on https or http://localhost."
     />
 
-    <UPageCard
-      title="Registered passkeys"
-      :description="loading ? 'Loading…' : passkeys.length ? `${passkeys.length} passkey${passkeys.length === 1 ? '' : 's'}` : 'No passkeys on this account yet.'"
-    >
+    <UCard>
+      <template #header>
+        <div>
+          <p class="font-semibold">
+            Registered passkeys
+          </p>
+          <p class="text-sm text-muted">
+            {{ loading ? 'Loading…' : passkeys.length ? `${passkeys.length} passkey${passkeys.length === 1 ? '' : 's'}` : 'No passkeys on this account yet.' }}
+          </p>
+        </div>
+      </template>
       <ul
         v-if="passkeys.length"
         class="space-y-2"
@@ -188,6 +195,6 @@ onMounted(() => {
       >
         Add a passkey to sign in without a password on this device.
       </p>
-    </UPageCard>
+    </UCard>
   </section>
 </template>

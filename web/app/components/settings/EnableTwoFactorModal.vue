@@ -152,7 +152,8 @@ function onModalOpenChange(open: boolean) {
   />
 
   <UModal
-    :open="openModal"
+    v-if="openModal"
+    :open="true"
     :dismissible="false"
     title="Setup two-factor authentication"
     @update:open="onModalOpenChange"
