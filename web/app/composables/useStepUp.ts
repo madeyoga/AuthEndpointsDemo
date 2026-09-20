@@ -1,23 +1,38 @@
-import StepUpModal from '~/components/StepUpModal.vue'
 import type { StepUpContext } from '~/types/auth'
 
 /** In-memory only — never persist the ReAuth token or pending actions. */
 let lastReauthToken: string | undefined
+let pendingResolve: ((token: string | undefined) => void) | undefined
 
-export function useStepUp() {
-  const overlay = useOverlay()
+export function useStepUpUi() {
+  const open = useState('step-up-open', () => false)
 
-  async function prompt(): Promise<string | undefined> {
-    const modal = overlay.create(StepUpModal, {
-      destroyOnClose: true
-    })
-    const instance = modal.open()
-    const result = await instance.result
+  function finish(result?: { reauthToken: string }) {
+    open.value = false
+    const resolve = pendingResolve
+    pendingResolve = undefined
     if (!result || typeof result !== 'object' || !('reauthToken' in result)) {
-      return undefined
+      resolve?.(undefined)
+      return
     }
     lastReauthToken = result.reauthToken || undefined
-    return lastReauthToken ?? ''
+    resolve?.(lastReauthToken ?? '')
+  }
+
+  return {
+    open,
+    finish
+  }
+}
+
+export function useStepUp() {
+  const { open } = useStepUpUi()
+
+  async function prompt(): Promise<string | undefined> {
+    return await new Promise((resolve) => {
+      pendingResolve = resolve
+      open.value = true
+    })
   }
 
   async function invoke<T>(action: (ctx: StepUpContext) => Promise<T>): Promise<T> {

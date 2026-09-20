@@ -236,20 +236,19 @@ onMounted(() => {
 
 <template>
   <UModal
+    :default-open="true"
     title="Confirm your identity"
     description="This action needs a recent identity confirmation."
     :close="{ onClick: () => finish() }"
     @update:open="onOpenChange"
   >
     <template #body>
-      <div
+      <p
         v-if="loadingMethods"
-        class="space-y-3"
+        class="text-sm text-muted"
       >
-        <USkeleton class="h-8 w-full" />
-        <USkeleton class="h-10 w-full" />
-        <USkeleton class="h-10 w-24" />
-      </div>
+        Loading confirmation methods…
+      </p>
 
       <UAlert
         v-else-if="methodsError"
