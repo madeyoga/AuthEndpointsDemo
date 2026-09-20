@@ -34,6 +34,23 @@ onMounted(async () => {
       </p>
     </div>
 
+    <div class="flex flex-wrap gap-2">
+      <UButton
+        to="/app/security"
+        icon="i-lucide-shield"
+      >
+        Security
+      </UButton>
+      <UButton
+        to="/app/passkeys"
+        color="neutral"
+        variant="outline"
+        icon="i-lucide-fingerprint"
+      >
+        Passkeys
+      </UButton>
+    </div>
+
     <UCard>
       <dl class="space-y-3 text-sm">
         <div class="flex items-center justify-between gap-3">

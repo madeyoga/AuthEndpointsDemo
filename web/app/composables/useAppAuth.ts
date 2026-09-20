@@ -48,6 +48,24 @@ export function safeAppRedirect(value: unknown) {
   return '/app'
 }
 
+export function problemTitle(error: unknown): string {
+  if (error instanceof FetchError && error.data && typeof error.data === 'object') {
+    const data = error.data as { title?: string, detail?: string }
+    return data.title || data.detail || ''
+  }
+  return ''
+}
+
+export function isRequiresTwoFactor(error: unknown) {
+  const title = problemTitle(error)
+  return title === 'RequiresTwoFactor'
+}
+
+export function isLockedOut(error: unknown) {
+  const title = problemTitle(error)
+  return title === 'LockedOut'
+}
+
 export function confirmRedirectStatus(url: string): 'confirmed' | 'failed' | null {
   if (url.includes('status=confirmed')) {
     return 'confirmed'
@@ -80,15 +98,30 @@ export function useAppAuth() {
     clearPendingRegistration()
   }
 
-  const loginWithPassword = async (email: string, password: string, rememberMe = true) => {
+  const loginWithPassword = async (
+    email: string,
+    password: string,
+    rememberMe = true,
+    extra?: {
+      twoFactorCode?: string
+      twoFactorRecoveryCode?: string
+    }
+  ) => {
     ensureCookieMode()
+    const body: Record<string, string> = {
+      email,
+      password
+    }
+    if (extra?.twoFactorCode) {
+      body.twoFactorCode = extra.twoFactorCode
+    }
+    if (extra?.twoFactorRecoveryCode) {
+      body.twoFactorRecoveryCode = extra.twoFactorRecoveryCode
+    }
     await api('/auth/cookie/login', {
       method: 'POST',
       query: rememberMe ? { useSessionCookies: false } : { useSessionCookies: true },
-      body: {
-        email,
-        password
-      },
+      body,
       skipCsrf: true,
       auth: false
     })
@@ -164,6 +197,8 @@ export function useAppAuth() {
     confirmEmail,
     problemMessage,
     isPasskeyCancel,
+    isRequiresTwoFactor,
+    isLockedOut,
     safeAppRedirect
   }
 }

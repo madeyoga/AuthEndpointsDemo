@@ -141,6 +141,14 @@ async function removePasskey(credentialId: string) {
   >
     <UAlert
       class="mb-4"
+      color="neutral"
+      variant="subtle"
+      title="Product UI"
+      description="The cookie app manages passkeys at /app/passkeys. This panel is the raw API playground."
+    />
+
+    <UAlert
+      class="mb-4"
       color="info"
       variant="subtle"
       title="Browser + localhost"

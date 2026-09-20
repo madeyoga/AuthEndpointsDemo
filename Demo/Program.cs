@@ -29,6 +29,7 @@ builder.Services
     {
         o.IdentityPath = "/auth/cookie";
         o.PasskeyPath = "/auth/passkey";
+        o.Passkeys.Enabled = true;
         o.Passkeys.ServerDomain = "localhost";
         o.RequireConfirmedAccount = true;
         o.EmailConfirmation.ConfirmEmailRedirectUri = "/app/confirm-email";

@@ -28,5 +28,14 @@ const links = [
     >
       {{ link.label }}
     </UButton>
+    <UButton
+      to="/app"
+      icon="i-lucide-app-window"
+      color="neutral"
+      variant="ghost"
+      class="justify-start"
+    >
+      Cookie app
+    </UButton>
   </nav>
 </template>

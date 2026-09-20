@@ -14,6 +14,8 @@ interface ApiRequestOptions {
   auth?: boolean
   /** Attach X-AuthEndpoints-Reauth */
   reauth?: boolean
+  /** Override the stored ReAuth token for this call (empty skips the header so the ReAuth cookie can be used). */
+  reauthToken?: string | null
   /** Do not log this call (e.g. csrf prefetch) */
   silent?: boolean
 }
@@ -74,8 +76,11 @@ export function useApi() {
       headers.Authorization = `Bearer ${accessToken.value}`
     }
 
-    if (options.reauth && reauthToken.value) {
-      headers['X-AuthEndpoints-Reauth'] = reauthToken.value
+    if (options.reauth) {
+      const token = options.reauthToken !== undefined ? options.reauthToken : reauthToken.value
+      if (token) {
+        headers['X-AuthEndpoints-Reauth'] = token
+      }
     }
 
     if (isMutating(method) && !options.skipCsrf) {

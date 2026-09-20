@@ -11,15 +11,13 @@ const route = useRoute()
 const { loginWithPassword, loginFailureMessage } = useAppAuth()
 const { pending, clear, syncExpiry, passwordStash, broadcastConfirmed } = usePendingRegistration()
 
-const status = computed(() => {
-  const value = route.query.status
+function firstQuery(name: string) {
+  const value = route.query[name]
   return typeof value === 'string' ? value : ''
-})
+}
 
-const flow = computed(() => {
-  const value = route.query.flow
-  return typeof value === 'string' ? value : ''
-})
+const status = computed(() => firstQuery('status'))
+const flow = computed(() => firstQuery('flow'))
 
 const isConfirmed = computed(() => status.value === 'confirmed')
 const isFailed = computed(() => status.value === 'failed')
@@ -34,7 +32,7 @@ const title = computed(() => {
     return isChangeEmail.value ? 'Email updated' : 'Email confirmed'
   }
   if (isFailed.value) {
-    return isChangeEmail.value ? 'Email change failed' : 'Confirmation failed'
+    return isChangeEmail.value ? 'Email change failed' : 'Email confirmation failed'
   }
   return 'Email confirmation'
 })
@@ -47,14 +45,37 @@ const description = computed(() => {
     if (signInError.value) {
       return 'Your email is confirmed, but automatic sign-in did not succeed.'
     }
-    return isChangeEmail.value
-      ? 'Your email address was updated. Sign in with the new address.'
-      : 'Your email is confirmed. Sign in to continue.'
+    if (isChangeEmail.value) {
+      return 'Your email address has been updated. Sign in with your new email.'
+    }
+    return 'Your email has been confirmed. You can now sign in.'
   }
   if (isFailed.value) {
-    return 'This confirmation link is invalid or expired. Register again or try signing in if you already confirmed.'
+    if (isChangeEmail.value) {
+      return 'We could not update your email. The link may be invalid or expired. Sign in and request a new change-email confirmation.'
+    }
+    return 'We could not confirm your email. The link may be invalid or expired. Register again, or sign in if you already confirmed.'
   }
   return 'Open this page from the confirmation redirect, or sign in if you already confirmed your email.'
+})
+
+const showSignIn = computed(() => {
+  if (signingIn.value) {
+    return false
+  }
+  const waitingForAutoLogin = isConfirmed.value
+    && !isChangeEmail.value
+    && !signInError.value
+    && !!passwordStash()
+    && !autoLoginAttempted.value
+  return !waitingForAutoLogin
+})
+
+const signInLabel = computed(() => {
+  if (isChangeEmail.value) {
+    return 'Sign in with new email'
+  }
+  return 'Sign in'
 })
 
 async function tryStashedPasswordLogin() {
@@ -107,6 +128,13 @@ onMounted(() => {
       color="error"
       variant="subtle"
       :description="signInError"
+    />
+
+    <UButton
+      v-if="showSignIn"
+      to="/app/login"
+      :label="signInLabel"
+      block
     />
   </div>
 </template>
