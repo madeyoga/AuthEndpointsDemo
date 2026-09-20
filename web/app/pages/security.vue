@@ -114,6 +114,14 @@ async function testReauth() {
     title="Security"
     description="ReAuth step-up, 2FA management, and the Demo /test/reauth endpoint."
   >
+    <UAlert
+      class="mb-4"
+      color="neutral"
+      variant="subtle"
+      title="Product UI"
+      description="The cookie app manages security at /app/security. This panel is the raw API playground."
+    />
+
     <div class="mb-4">
       <UBadge
         :color="reauthToken ? 'success' : 'neutral'"

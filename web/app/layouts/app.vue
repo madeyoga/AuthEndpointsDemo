@@ -25,6 +25,24 @@ async function logout() {
           AuthEndpoints Demo
         </NuxtLink>
         <div class="flex items-center gap-2">
+          <UButton
+            to="/app/security"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-shield"
+          >
+            Security
+          </UButton>
+          <UButton
+            to="/app/passkeys"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-fingerprint"
+          >
+            Passkeys
+          </UButton>
           <UBadge
             v-if="email || info?.email"
             color="success"

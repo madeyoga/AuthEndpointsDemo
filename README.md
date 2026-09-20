@@ -33,13 +33,17 @@ API listens on **http://localhost:5041**.
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | Optional GitHub OAuth |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth |
 
-Packages: `AuthEndpoints` **3.0.7**, `AuthEndpoints.External.OAuth` **3.0.0-preview.3**.
+Packages: `AuthEndpoints` **3.1.0**, `AuthEndpoints.External.OAuth` **3.0.0-preview.3**.
 
 OpenAPI / Scalar: http://localhost:5041/scalar
 
 Emails (confirmation, password reset) are written to the **API console** via `ConsoleEmailSender`.
 
 `RequireConfirmedAccount` is **true**. After `GET /auth/cookie/confirmEmail`, the API redirects to `/app/confirm-email?status=confirmed|failed&flow=confirm` (or `flow=change-email`). The Demo host forwards that rooted path to the Nuxt origin so the browser lands on the SPA.
+
+Passkeys are **enabled** (`Passkeys.Enabled = true`, `Passkeys.ServerDomain = localhost`). ReAuth step-up uses the library default lifetime of **5 minutes**.
+
+Cookie identity stays under `/auth/cookie` (not `/account`). CSRF header is `RequestVerificationToken`.
 
 ### Route prefixes
 
@@ -71,10 +75,12 @@ Cookie-only product path (JWT stays on the playground):
 4. Confirm:
    - Click the console link (browser follows confirm → `/app/confirm-email?status=&flow=`), or
    - On `/app/check-email`, expand **Local dev: paste confirmation link** (same parse → `GET /auth/cookie/confirmEmail` path as the playground Account panel)
-5. Sign in with password or passkey
-6. Dummy home shows account info from `/auth/cookie/manage/info`; Logout returns to `/app/login`
+5. Sign in with password or passkey. Password sign-in opens a two-factor modal when the account requires it. Forgot / reset password is `/app/forgot-password` and `/app/reset-password` (reset codes are in the API console).
+6. Dummy home shows account info from `/auth/cookie/manage/info`, with links to **Security** (`/app/security`) and **Passkeys** (`/app/passkeys`). Logout returns to `/app/login`
 
-Playground paste-link path remains on **Register / Confirm** (`/account`).
+Sensitive security and passkey mutations try the action first, then prompt for identity (password, authenticator, recovery code, or passkey when `GET /auth/cookie/manage/authMethods` reports one). The ReAuth token is kept in memory only.
+
+Playground paste-link path remains on **Register / Confirm** (`/account`). Playground Security / Passkeys panels remain raw API explorers; the product UI is under `/app`.
 
 ### Playground
 
