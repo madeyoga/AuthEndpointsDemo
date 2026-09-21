@@ -67,3 +67,9 @@ export interface InfoUpdateRequest {
   newPassword?: string
   oldPassword?: string
 }
+
+export interface ExternalLogin {
+  loginProvider: string
+  providerKey: string
+  providerDisplayName?: string | null
+}

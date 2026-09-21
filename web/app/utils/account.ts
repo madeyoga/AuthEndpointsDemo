@@ -1,4 +1,4 @@
-import type { ManageInfo, TwoFactorStatus } from '~/types/auth'
+import type { ExternalLogin, ManageInfo, PasskeyCredential, TwoFactorStatus } from '~/types/auth'
 
 export function normalizeInfoResponse(raw: unknown): ManageInfo {
   const value = (raw ?? {}) as Record<string, unknown>
@@ -36,4 +36,23 @@ export function totpUri(email: string, sharedKey: string) {
   const issuer = encodeURIComponent('AuthEndpoints Demo')
   const account = encodeURIComponent(email || 'account')
   return `otpauth://totp/${issuer}:${account}?secret=${encodeURIComponent(sharedKey)}&issuer=${issuer}&digits=6`
+}
+
+export function readPasskeys(raw: unknown): PasskeyCredential[] {
+  const value = (raw ?? {}) as Record<string, unknown>
+  const list = value.passkeys ?? value.Passkeys
+  return Array.isArray(list) ? list as PasskeyCredential[] : []
+}
+
+export function normalizeExternalLogins(raw: unknown): ExternalLogin[] {
+  const list = Array.isArray(raw) ? raw : []
+  return list.map((item) => {
+    const value = (item ?? {}) as Record<string, unknown>
+    const displayName = value.providerDisplayName ?? value.ProviderDisplayName
+    return {
+      loginProvider: String(value.loginProvider ?? value.LoginProvider ?? ''),
+      providerKey: String(value.providerKey ?? value.ProviderKey ?? ''),
+      providerDisplayName: displayName == null || displayName === '' ? null : String(displayName)
+    }
+  }).filter(item => item.loginProvider && item.providerKey)
 }
