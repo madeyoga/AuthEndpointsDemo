@@ -25,7 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(o =>
 });
 
 builder.Services
-    .AddAuthEndpoints<AppUser, AppDbContext>(o =>
+    .AddAuthEndpoints<AppUser, AppRole, AppDbContext>(o =>
     {
         o.IdentityPath = "/auth/cookie";
         o.PasskeyPath = "/auth/passkey";
@@ -41,9 +41,7 @@ builder.Services
                 Environment.GetEnvironmentVariable("JWT_SYMMETRIC_KEY")
                 ?? "DemoOnly_ChangeMe_AuthEndpoints_Jwt_SigningKey_32+";
         };
-    })
-    .AddRoles<AppRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    });
 
 builder.Services.Configure<AntiforgeryOptions>(o =>
 {
