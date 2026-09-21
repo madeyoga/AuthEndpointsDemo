@@ -162,12 +162,12 @@ app.MapGet("createDefaultUser", async (UserManager<AppUser> userManager) =>
 {
     var user = new AppUser()
     {
-        UserName = "admin@authendpoints.id",
-        Email = "admin@authendpoints.id",
+        UserName = "admin@ae.com",
+        Email = "admin@ae.com",
         EmailConfirmed = true
     };
 
-    await userManager.CreateAsync(user, "T3$ttest");
+    await userManager.CreateAsync(user, "P@$$w0rd1");
 
     return Results.Ok();
 });
